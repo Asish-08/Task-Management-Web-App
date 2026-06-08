@@ -1,0 +1,68 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'infra/template.yaml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        working-directory: backend
+        run: python -m pytest tests/ -v --tb=short
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: SAM Build
+        working-directory: infra
+        run: sam build --template template.yaml
+
+      - name: SAM Deploy
+        working-directory: infra
+        run: |
+          sam deploy \
+            --s3-bucket ${{ secrets.SAM_S3_BUCKET }} \
+            --parameter-overrides \
+              "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
+              "CorsOrigins=${{ secrets.CORS_ORIGINS }}" \
+              "VpcId=${{ secrets.VPC_ID }}" \
+              "PrivateSubnet1=${{ secrets.PRIVATE_SUBNET_1 }}" \
+              "PrivateSubnet2=${{ secrets.PRIVATE_SUBNET_2 }}" \
+              "RdsSecurityGroupId=${{ secrets.RDS_SG_ID }}"

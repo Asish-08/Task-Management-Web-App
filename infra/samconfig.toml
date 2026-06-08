@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name     = "taskpulse"
+s3_prefix      = "taskpulse"
+region         = "us-east-1"
+capabilities   = "CAPABILITY_IAM"
+# Sensitive parameters (DatabaseUrl, VPC IDs) are passed via --parameter-overrides
+# in the GitHub Actions workflow rather than stored here.
+confirm_changeset = false
+fail_on_empty_changeset = false

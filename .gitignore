@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+.env
+.env.local
+*.env
+
+# Node / Frontend
+node_modules/
+dist/
+.cache/
+.parcel-cache/
+*.tgz
+
+# Vite
+frontend/dist/
+frontend/.vite/
+
+# AWS / SAM
+.aws-sam/
+samconfig.toml.bak
+*.zip
+
+# Secrets / Credentials
+*.pem
+*.key
+credentials
+.aws/credentials
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Logs
+*.log
