@@ -112,3 +112,99 @@ Migrations are plain SQL files in `infra/migrations/`. Run them in order. The sc
 | `VITE_API_BASE_URL` | `frontend/.env.local` | Backend base URL for axios client |
 
 Production values are injected via SAM `--parameter-overrides` (backend) and set as GitHub Actions secrets during `npm run build` (frontend).
+
+---
+
+## Production infrastructure
+
+| Resource | Value |
+|---|---|
+| API Gateway endpoint | `https://i3tl59i1eh.execute-api.us-east-1.amazonaws.com` |
+| CloudFront URL (live app) | `https://d2oabhwmkkcnog.cloudfront.net` |
+| S3 bucket (frontend) | `taskpulse-frontend-678412441430` |
+| CloudFront distribution ID | `E14ZNJOE92IGUH` |
+| CloudFormation stack | `taskpulse-backend` (us-east-1) |
+| RDS endpoint | `taskpulse-db.csnao2i84gz1.us-east-1.rds.amazonaws.com` |
+| SAM artifact bucket | `aws-sam-cli-managed-default-samclisourcebucket-c8brpxqx64qb` |
+| IAM deploy user | `taskpulse-admin` |
+
+### Manual re-deploy (if needed)
+
+```bash
+# From project root, conda env taskpulse-deploy active
+sam build -t infra/template.yaml
+
+sam deploy \
+  --config-file infra/samconfig.toml \
+  --no-confirm-changeset \
+  --parameter-overrides \
+    "Environment=default" \
+    "DatabaseUrl=postgresql://taskpulse:taskpulse_prod_2024@taskpulse-db.csnao2i84gz1.us-east-1.rds.amazonaws.com:5432/taskpulse" \
+    "CorsOrigins=*"
+
+# After deploy: update frontend/.env.production with ApiEndpoint output, then:
+cd frontend && npm run build
+
+aws s3 sync frontend/dist/ s3://taskpulse-frontend-678412441430 \
+  --delete --exclude "index.html" \
+  --cache-control "public,max-age=31536000,immutable"
+
+aws s3 cp frontend/dist/index.html s3://taskpulse-frontend-678412441430/index.html \
+  --cache-control "no-cache,no-store,must-revalidate" --content-type "text/html"
+
+aws cloudfront create-invalidation \
+  --distribution-id E14ZNJOE92IGUH --paths "/*"
+```
+
+---
+
+## CI/CD pipeline
+
+Two GitHub Actions workflows in `.github/workflows/`:
+
+| Workflow | Trigger | Does |
+|---|---|---|
+| `backend-deploy.yml` | `backend/**` or `infra/template.yaml` | Runs tests → SAM deploy |
+| `frontend-deploy.yml` | `frontend/**` | Builds → S3 sync (two-step cache) → CF invalidation |
+
+### Required GitHub repository secrets
+
+Set at: repo → Settings → Secrets and variables → Actions → Repository secrets
+
+| Secret name | Value |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | Access key ID for `taskpulse-admin` IAM user |
+| `AWS_SECRET_ACCESS_KEY` | Secret key for `taskpulse-admin` IAM user |
+| `DATABASE_URL` | Full PostgreSQL connection string (see RDS endpoint above) |
+| `CORS_ORIGINS` | `*` |
+| `VITE_API_BASE_URL` | API Gateway endpoint URL (no trailing slash) |
+| `S3_BUCKET_NAME` | `taskpulse-frontend-678412441430` (bare name, no `s3://` prefix) |
+| `CLOUDFRONT_DISTRIBUTION_ID` | `E14ZNJOE92IGUH` |
+
+### Known gotchas — do not repeat these mistakes
+
+**Python version** — Lambda runtime is `python3.11`. CI workflows must also use `python-version: '3.11'`. Mismatching versions (e.g. 3.12) lets tests pass locally but hides runtime incompatibilities.
+
+**DATABASE_URL in CI tests** — `app/config.py` instantiates `Settings()` at import time. If `DATABASE_URL` is not set, pydantic-settings raises a validation error before pytest collects a single test. Always set it in the test step env block:
+```yaml
+env:
+  DATABASE_URL: "sqlite:///:memory:"   # must be quoted — trailing colon breaks YAML
+```
+
+**Quote all SAM parameter overrides** — In a bash `run:` block, an unquoted `*` glob-expands to filenames. `CorsOrigins=*` becomes `CorsOrigins=.aws-sam .github backend ...` and CloudFormation rejects the changeset. Always quote:
+```yaml
+--parameter-overrides \
+  "Environment=production" \
+  "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
+  "CorsOrigins=*"
+```
+
+**`--resolve-s3` is required when running `sam deploy` outside `infra/`** — `samconfig.toml` lives in `infra/`. If `sam deploy` runs from the repo root without `--config-file infra/samconfig.toml`, the config is not picked up and SAM has no S3 bucket for artifact upload. Always either run from `infra/` or pass `--resolve-s3` explicitly.
+
+**Node version** — Vite v8 requires Node.js 20.19+ or 22.12+. Node 18 (EOL) crashes with `ReferenceError: CustomEvent is not defined`. Use `node-version: '22'` in all frontend build steps.
+
+**AWS_REGION is not a secret** — Region is not sensitive. Storing it as a GitHub secret means a missing/empty secret silently breaks all `aws-actions/configure-aws-credentials` steps with "Could not load credentials from any providers". Hardcode `us-east-1` directly in workflow files.
+
+**S3_BUCKET_NAME is the bare bucket name** — The workflow constructs `s3://${{ secrets.S3_BUCKET_NAME }}`. If the secret value includes `s3://`, the result is `s3://s3://...` and the sync fails. Value must be `taskpulse-frontend-678412441430` with no prefix.
+
+**Do not add a catch-all workflow with no `paths:` filter** — A workflow that fires on every push to `main` with no path filter will race any path-filtered workflow that covers the same stack. Two concurrent SAM deploys to the same CloudFormation stack causes "Stack is in UPDATE_IN_PROGRESS" failures. Always use path filters and keep one workflow per concern.
