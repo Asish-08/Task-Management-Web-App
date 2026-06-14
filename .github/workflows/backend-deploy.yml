@@ -60,6 +60,7 @@ jobs:
         working-directory: infra
         run: |
           sam deploy \
+            --no-confirm-changeset \
             --parameter-overrides \
               "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
               "CorsOrigins=${{ secrets.CORS_ORIGINS }}"
