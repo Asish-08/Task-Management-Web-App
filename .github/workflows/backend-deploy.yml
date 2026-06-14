@@ -58,11 +58,6 @@ jobs:
         working-directory: infra
         run: |
           sam deploy \
-            --s3-bucket ${{ secrets.SAM_S3_BUCKET }} \
             --parameter-overrides \
               "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
-              "CorsOrigins=${{ secrets.CORS_ORIGINS }}" \
-              "VpcId=${{ secrets.VPC_ID }}" \
-              "PrivateSubnet1=${{ secrets.PRIVATE_SUBNET_1 }}" \
-              "PrivateSubnet2=${{ secrets.PRIVATE_SUBNET_2 }}" \
-              "RdsSecurityGroupId=${{ secrets.RDS_SG_ID }}"
+              "CorsOrigins=${{ secrets.CORS_ORIGINS }}"

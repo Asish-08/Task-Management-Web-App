@@ -1,11 +1,16 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name     = "taskpulse"
-s3_prefix      = "taskpulse"
-region         = "us-east-1"
+stack_name     = "taskpulse-backend"
+s3_prefix      = "taskpulse-backend"
 capabilities   = "CAPABILITY_IAM"
 # Sensitive parameters (DatabaseUrl, VPC IDs) are passed via --parameter-overrides
 # in the GitHub Actions workflow rather than stored here.
-confirm_changeset = false
+confirm_changeset = true
 fail_on_empty_changeset = false
+resolve_s3 = true
+parameter_overrides = "Environment=\"default\" CorsOrigins=\"*\""
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"

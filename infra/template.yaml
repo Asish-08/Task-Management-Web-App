@@ -11,19 +11,11 @@ Parameters:
     NoEcho: true
   CorsOrigins:
     Type: String
-    Default: "https://taskpulse.yourdomain.com"
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-  PrivateSubnet1:
-    Type: AWS::EC2::Subnet::Id
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet::Id
-  RdsSecurityGroupId:
-    Type: String
+    Default: "*"
 
 Globals:
   Function:
-    Runtime: python3.12
+    Runtime: python3.11
     Timeout: 30
     MemorySize: 256
     Environment:
@@ -33,22 +25,6 @@ Globals:
         ENVIRONMENT: !Ref Environment
 
 Resources:
-
-  # ── Lambda Security Group ────────────────────────────────────────────────
-  LambdaSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: TaskPulse Lambda outbound to RDS
-      VpcId: !Ref VpcId
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
-          DestinationSecurityGroupId: !Ref RdsSecurityGroupId
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
 
   # ── IAM Role ─────────────────────────────────────────────────────────────
   LambdaExecutionRole:
@@ -62,7 +38,6 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
   # ── Lambda Function ───────────────────────────────────────────────────────
@@ -73,9 +48,6 @@ Resources:
       Handler: app.main.handler
       CodeUri: ../backend/
       Role: !GetAtt LambdaExecutionRole.Arn
-      VpcConfig:
-        SecurityGroupIds: [!Ref LambdaSecurityGroup]
-        SubnetIds: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
       Events:
         ApiProxy:
           Type: HttpApi
@@ -97,7 +69,7 @@ Resources:
       StageName: $default
       CorsConfiguration:
         AllowOrigins:
-          - !Ref CorsOrigins
+          - "*"
         AllowMethods: [GET, POST, PATCH, OPTIONS]
         AllowHeaders: [Content-Type, Authorization]
         MaxAge: 86400
