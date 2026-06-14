@@ -15,7 +15,7 @@ def get_heatmap(db: Session = Depends(get_db)):
     fixing off-by-one errors for users in UTC-offset timezones.
     """
     # 400 days covers the monthly-aligned grid (up to ~372 days) plus Monday-alignment padding
-    start_dt = datetime.now(timezone.utc) - timedelta(days=400)
+    start_dt = datetime.now(timezone.utc) - timedelta(days=400)     
 
     rows = (
         db.query(Task.completed_at)
