@@ -1,117 +1,107 @@
 # TaskPulse
 
-A personal productivity web app combining task tracking, a GitHub-style activity heatmap, a Pomodoro timer, and a daily motivational quote.
+A personal productivity dashboard with a GitHub-style activity heatmap, Pomodoro timer, and task completion history.
 
-> **Live URL:** _add after deployment_
+**Live:** https://d2oabhwmkkcnog.cloudfront.net
+
+---
+
+## Stack
+
+| Layer    | Technology                |
+| -------- | ------------------------- |
+| Frontend | React + Tailwind CSS      |
+| Backend  | Python + FastAPI + Mangum |
+| Database | PostgreSQL (AWS RDS)      |
+| Hosting  | AWS S3 + CloudFront       |
+| API      | AWS Lambda + API Gateway  |
+| CI/CD    | GitHub Actions            |
 
 ---
 
 ## Features
 
-- **Task tracker** — add tasks, mark them complete, view today's completed tasks
-- **Activity heatmap** — 52-week grid showing task completion intensity by day; click any block to see that day's tasks
-- **Pomodoro timer** — 25-minute countdown with start/pause/reset; runs entirely client-side
-- **Daily quote** — deterministic daily rotation from a seeded quotes table (same quote all day, changes at midnight)
+- Add and complete tasks with persistent storage
+- GitHub-style heatmap showing daily activity over 365 days
+- 25-minute Pomodoro countdown timer
+- Daily Bible verse for motivation
+- Completed tasks log with timestamps
 
 ---
 
-## Tech stack
+## Local Development
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 19, Tailwind CSS 3, Vite 8 |
-| Backend | Python FastAPI, Mangum (ASGI → Lambda) |
-| Database | PostgreSQL (AWS RDS db.t3.micro) |
-| Infrastructure | AWS SAM (Lambda, API Gateway, S3, CloudFront) |
-| CI/CD | GitHub Actions |
-
----
-
-## Local development
-
-**Prerequisites:** Docker Desktop, Python 3.11+, Node.js 18+
-
-### 1. Start local PostgreSQL
+**Prerequisites:** Docker, Python 3.11, Node 18
 
 ```bash
-docker run -d --name taskpulse-db \
-  -e POSTGRES_USER=taskpulse \
-  -e POSTGRES_PASSWORD=taskpulse \
-  -e POSTGRES_DB=taskpulse \
-  -p 5432:5432 \
-  postgres:16-alpine
-```
+# 1. Start the database
+docker start taskpulse-db
 
-### 2. Run database migrations
-
-```bash
-psql postgresql://taskpulse:taskpulse@localhost:5432/taskpulse \
-  -f infra/migrations/001_create_tasks.sql \
-  -f infra/migrations/002_create_quotes.sql \
-  -f infra/migrations/003_seed_quotes.sql
-```
-
-### 3. Start the backend
-
-```bash
+# 2. Start the backend (Terminal 1)
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
+source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
-```
 
-Swagger UI available at `http://localhost:8000/docs`.
-
-### 4. Start the frontend
-
-```bash
+# 3. Start the frontend (Terminal 2)
 cd frontend
-npm install
 npm run dev
 ```
 
-App available at `http://localhost:5173`.
+App runs at `http://localhost:5173` — API docs at `http://localhost:8000/docs`
 
-### Run tests
+---
+
+## Database Migrations
 
 ```bash
-cd backend
-python -m pytest tests/ -v   # no running Postgres needed (uses SQLite in-memory)
+# Run against local Docker
+docker exec -i taskpulse-db psql -U taskpulse -d taskpulse < infra/migrations/001_create_tasks.sql
+docker exec -i taskpulse-db psql -U taskpulse -d taskpulse < infra/migrations/002_create_quotes.sql
+docker exec -i taskpulse-db psql -U taskpulse -d taskpulse < infra/migrations/003_seed_quotes.sql
 ```
-
----
-
-## Project structure
-
-```
-taskpulse/
-├── backend/     FastAPI app (Lambda-compatible via Mangum)
-├── frontend/    React + Tailwind SPA
-├── infra/       AWS SAM template + PostgreSQL migration SQL files
-└── .github/     GitHub Actions workflows for frontend and backend deploys
-```
-
----
-
-## API routes
-
-| Method | Route | Description |
-|---|---|---|
-| `POST` | `/tasks` | Create a new task |
-| `GET` | `/tasks` | Fetch all active tasks |
-| `PATCH` | `/tasks/{id}/complete` | Mark a task complete |
-| `GET` | `/tasks/completed` | Fetch completed tasks (last 14 days) |
-| `GET` | `/heatmap` | UTC timestamps of completions (last 400 days) |
-| `GET` | `/quotes` | Today's motivational quote |
 
 ---
 
 ## Deployment
 
-Infrastructure is defined in `infra/template.yaml` (AWS SAM). Configuration defaults are in `infra/samconfig.toml`.
+Deployments to `main` trigger automatically via GitHub Actions — backend via AWS SAM, frontend via S3 sync + CloudFront cache invalidation.
 
-GitHub Actions workflows in `.github/workflows/` automatically deploy on push to `main`:
-- `frontend-deploy.yml` — builds the React app and syncs to S3, then invalidates the CloudFront cache
-- `backend-deploy.yml` — runs the test suite, then runs `sam build` + `sam deploy`
+To deploy manually:
 
-See `CLAUDE.md` for the full list of GitHub Actions secrets required.
+```bash
+# Backend
+sam build -t infra/template.yaml
+sam deploy --no-confirm-changeset -t infra/template.yaml
+
+# Frontend
+cd frontend && npm run build
+aws s3 sync dist/ s3://$S3_BUCKET_NAME --delete
+aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+```
+
+---
+
+## Project Structure
+
+```
+taskpulse/
+├── frontend/         # React app
+├── backend/          # FastAPI app
+├── infra/
+│   ├── template.yaml         # AWS SAM template
+│   └── migrations/           # SQL migration files
+└── .github/workflows/        # CI/CD pipeline
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint               | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| GET    | `/tasks`               | Fetch active tasks                 |
+| POST   | `/tasks`               | Create a task                      |
+| PATCH  | `/tasks/{id}/complete` | Complete a task                    |
+| GET    | `/tasks/completed`     | Fetch completed tasks              |
+| GET    | `/heatmap`             | Daily completion counts (365 days) |
+| GET    | `/quotes`              | Fetch a motivational quote         |
