@@ -6,7 +6,7 @@ s3_prefix      = "taskpulse-backend"
 capabilities   = "CAPABILITY_IAM"
 # Sensitive parameters (DatabaseUrl, VPC IDs) are passed via --parameter-overrides
 # in the GitHub Actions workflow rather than stored here.
-confirm_changeset = true
+confirm_changeset = false
 fail_on_empty_changeset = false
 resolve_s3 = true
 parameter_overrides = "Environment=\"default\" CorsOrigins=\"*\""
