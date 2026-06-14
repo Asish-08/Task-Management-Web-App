@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: backend/requirements*.txt
 
@@ -26,6 +26,8 @@ jobs:
 
       - name: Run tests
         working-directory: backend
+        env:
+          DATABASE_URL: sqlite:///:memory:
         run: python -m pytest tests/ -v --tb=short
 
   deploy:
@@ -37,7 +39,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - uses: aws-actions/setup-sam@v2
         with:
