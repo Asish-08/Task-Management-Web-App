@@ -38,10 +38,11 @@ jobs:
             --stack-name taskpulse-backend \
             --region us-east-1 \
             --capabilities CAPABILITY_IAM \
+            --resolve-s3 \
             --parameter-overrides \
-              Environment=production \
-              DatabaseUrl=${{ secrets.DATABASE_URL }} \
-              CorsOrigins=*
+              "Environment=production" \
+              "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
+              "CorsOrigins=*"
 
   deploy-frontend:
     runs-on: ubuntu-latest
