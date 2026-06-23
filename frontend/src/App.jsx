@@ -48,7 +48,15 @@ export default function App() {
 
   // Which day's tasks to show — defaults to today, updated on block click
   const [selectedDate, setSelectedDate] = useState(null)
-  const [dark, setDark] = useState(false)
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+
+  function toggleDark() {
+    setDark(d => {
+      const next = !d
+      localStorage.setItem('theme', next ? 'dark' : 'light')
+      return next
+    })
+  }
 
   function handleDaySelect(date) {
     setSelectedDate(date)
@@ -74,7 +82,7 @@ export default function App() {
       <div className={`flex items-center justify-between pb-2 border-b ${dark ? 'border-zinc-800' : 'border-gray-200'}`}>
         <h1 className={`text-lg font-bold tracking-tight ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Tasks Tracker</h1>
         <button
-          onClick={() => setDark(d => !d)}
+          onClick={toggleDark}
           aria-label="Toggle dark mode"
           className={`relative w-14 h-7 rounded-full transition-colors duration-300 focus:outline-none
             ${dark ? 'bg-slate-700' : 'bg-blue-400'}`}
