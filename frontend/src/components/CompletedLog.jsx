@@ -12,8 +12,9 @@ function localDateStr(date) {
 }
 
 export function CompletedLog({ tasks, selectedDate, dark }) {
-  const isToday = selectedDate === localDateStr(new Date())
-  const label   = isToday ? 'Today' : formatShortDate(selectedDate)
+  const effectiveDate = selectedDate || localDateStr(new Date())
+  const isToday = effectiveDate === localDateStr(new Date())
+  const label   = isToday ? 'Today' : formatShortDate(effectiveDate)
 
   return (
     <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
