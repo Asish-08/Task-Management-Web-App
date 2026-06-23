@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="223" height="218" viewBox="0 0 223 218">
+  <!-- Transparent background -->
+
+  <rect x="72" y="7" width="28" height="28" rx="6" fill="#9dd74f"/>
+  <rect x="72" y="39" width="28" height="28" rx="6" fill="#9dd74f"/>
+  <rect x="40" y="39" width="28" height="28" rx="6" fill="#9dd74f"/>
+  <rect x="104" y="39" width="28" height="28" rx="6" fill="#d7cb43"/>
+  <rect x="136" y="39" width="28" height="28" rx="6" fill="#f2bf3f"/>
+
+  <rect x="40" y="71" width="28" height="28" rx="6" fill="#9dd74f"/>
+  <rect x="72" y="71" width="28" height="28" rx="6" fill="#cfc84a"/>
+  <rect x="104" y="71" width="28" height="28" rx="6" fill="#f0bb3e"/>
+  <rect x="136" y="71" width="28" height="28" rx="6" fill="#f5a53b"/>
+
+  <rect x="40" y="103" width="28" height="28" rx="6" fill="#8fd14d"/>
+  <rect x="72" y="103" width="28" height="28" rx="6" fill="#c0c54b"/>
+  <!-- Center focus block intentionally left blank -->
+  <rect x="136" y="103" width="28" height="28" rx="6" fill="#f36f3d"/>
+  <rect x="168" y="103" width="28" height="28" rx="6" fill="#f56a3d"/>
+
+  <rect x="40" y="135" width="28" height="28" rx="6" fill="#87cb4b"/>
+  <rect x="72" y="135" width="28" height="28" rx="6" fill="#f0b23c"/>
+  <rect x="104" y="135" width="28" height="28" rx="6" fill="#f37f3d"/>
+  <rect x="136" y="135" width="28" height="28" rx="6" fill="#f56a3d"/>
+  <rect x="168" y="135" width="28" height="28" rx="6" fill="#f75449"/>
+
+  <rect x="72" y="167" width="28" height="28" rx="6" fill="#f0bc3f"/>
+  <rect x="136" y="167" width="28" height="28" rx="6" fill="#f45a48"/>
+
+  <!-- Blank highlighted block outline -->
+  <rect x="104" y="103" width="28" height="28" rx="6" fill="none" stroke="#1b231d" stroke-width="4"/>
+</svg>
