@@ -13,7 +13,7 @@ function formatDate(dateStr) {
   return `${MONTHS[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')}`
 }
 
-export function Heatmap({ data, selectedDate, onDaySelect }) {
+export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
   const [tooltip, setTooltip] = useState(null)
   const hoverTimer            = useRef(null)
 
@@ -40,8 +40,8 @@ export function Heatmap({ data, selectedDate, onDaySelect }) {
 
   if (!data.length) {
     return (
-      <div className="bg-white rounded-xl p-4">
-        <h2 className="text-gray-900 font-semibold text-base mb-3">Activity</h2>
+      <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+        <h2 className={`font-semibold text-base mb-3 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Activity</h2>
         <div className="h-20 flex items-center justify-center text-gray-400 text-sm">
           Loading activity...
         </div>
@@ -64,8 +64,8 @@ export function Heatmap({ data, selectedDate, onDaySelect }) {
   })
 
   return (
-    <div className="bg-white rounded-xl p-4">
-      <h2 className="text-gray-900 font-semibold text-base mb-3">Activity</h2>
+    <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+      <h2 className={`font-semibold text-base mb-3 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Activity</h2>
 
       {/* Month labels */}
       <div className="flex gap-1 mb-1">
@@ -110,12 +110,12 @@ export function Heatmap({ data, selectedDate, onDaySelect }) {
       {/* Hover tooltip — appears after 500ms */}
       {tooltip && (
         <div
-          className="fixed z-50 bg-white border border-gray-300 rounded-lg
-                     px-3 py-1.5 shadow-md pointer-events-none select-none
-                     flex items-center gap-2"
+          className={`fixed z-50 rounded-lg px-3 py-1.5 shadow-md pointer-events-none select-none
+                     flex items-center gap-2 border
+                     ${dark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-300'}`}
           style={{ left: tooltip.x, top: tooltip.y }}
         >
-          <span className="text-gray-900 text-sm font-medium">
+          <span className={`text-sm font-medium ${dark ? 'text-gray-100' : 'text-gray-900'}`}>
             {formatDate(tooltip.date)}
           </span>
           {tooltip.count > 0 ? (

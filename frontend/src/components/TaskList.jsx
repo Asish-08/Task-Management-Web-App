@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { TaskInput } from './TaskInput'
 
-function TaskItem({ task, onComplete, onEdit }) {
+function TaskItem({ task, onComplete, onEdit, dark }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(task.title)
   const inputRef = useRef(null)
@@ -29,7 +29,7 @@ function TaskItem({ task, onComplete, onEdit }) {
   }
 
   return (
-    <li className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-2">
+    <li className={`flex items-center gap-3 rounded-lg px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-gray-100'}`}>
       <button
         onClick={() => onComplete(task.id)}
         className="w-5 h-5 rounded border border-gray-300 hover:border-indigo-500
@@ -43,12 +43,12 @@ function TaskItem({ task, onComplete, onEdit }) {
           onChange={e => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className="flex-1 text-sm text-gray-800 bg-white border border-indigo-400
-                     rounded px-2 py-0.5 outline-none min-w-0"
+          className={`flex-1 text-sm border border-indigo-400 rounded px-2 py-0.5 outline-none min-w-0
+            ${dark ? 'bg-zinc-700 text-gray-100' : 'bg-white text-gray-800'}`}
         />
       ) : (
         <span
-          className="text-sm text-gray-800 truncate flex-1 cursor-text"
+          className={`text-sm truncate flex-1 cursor-text ${dark ? 'text-gray-100' : 'text-gray-800'}`}
           onDoubleClick={startEdit}
           title="Double-click to edit"
         >
@@ -59,12 +59,12 @@ function TaskItem({ task, onComplete, onEdit }) {
   )
 }
 
-export function TaskList({ tasks, onAdd, onComplete, onEdit }) {
+export function TaskList({ tasks, onAdd, onComplete, onEdit, dark }) {
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl p-4 gap-3 overflow-hidden">
-      <h2 className="text-gray-900 font-semibold text-base flex-shrink-0">Active Tasks</h2>
+    <div className={`flex flex-col h-full rounded-xl p-4 gap-3 overflow-hidden ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+      <h2 className={`font-semibold text-base flex-shrink-0 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Active Tasks</h2>
       <div className="flex-shrink-0">
-        <TaskInput onAdd={onAdd} />
+        <TaskInput onAdd={onAdd} dark={dark} />
       </div>
       <ul className="flex-1 overflow-y-auto space-y-2 min-h-0">
         {tasks.map(task => (
@@ -73,6 +73,7 @@ export function TaskList({ tasks, onAdd, onComplete, onEdit }) {
             task={task}
             onComplete={onComplete}
             onEdit={onEdit}
+            dark={dark}
           />
         ))}
         {tasks.length === 0 && (

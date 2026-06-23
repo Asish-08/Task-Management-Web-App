@@ -11,6 +11,7 @@ export function PomodoroTimer({
   onBreak,
   isBreak,
   onSetCustomTime,
+  dark,
 }) {
   const [editSeg, setEditSeg] = useState(null)
   const [editBuffer, setEditBuffer] = useState('')
@@ -122,14 +123,14 @@ export function PomodoroTimer({
   }
 
   return (
-    <div ref={timerRef} className="bg-white rounded-xl p-4 h-full flex">
+    <div ref={timerRef} className={`rounded-xl p-4 h-full flex ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
       {/* Left: label + display + controls */}
       <div className="flex flex-col items-center justify-center gap-3 flex-1">
         <p className="text-indigo-600 text-xs font-semibold uppercase tracking-wider">
           Pomodoro
         </p>
 
-        <div className="text-5xl font-mono font-bold text-gray-900 tracking-widest tabular-nums select-none">
+        <div className={`text-5xl font-mono font-bold tracking-widest tabular-nums select-none ${dark ? 'text-gray-100' : 'text-gray-900'}`}>
           {renderSeg(dh, 'h')}
           <span>:</span>
           {renderSeg(dm, 'm')}
@@ -141,8 +142,8 @@ export function PomodoroTimer({
           <button
             onClick={onBreak}
             disabled={running || isBreak}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm
-                       px-4 py-2 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`text-sm px-4 py-2 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+              ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
           >
             Break
           </button>
@@ -155,8 +156,8 @@ export function PomodoroTimer({
           </button>
           <button
             onClick={onReset}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm
-                       px-4 py-2 rounded transition-colors"
+            className={`text-sm px-4 py-2 rounded transition-colors
+              ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
           >
             Reset
           </button>
@@ -176,7 +177,8 @@ export function PomodoroTimer({
             className={`text-xs px-3 py-1 rounded font-medium transition-colors w-16 text-center
               ${selectedDuration === i
                 ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed'
+                : dark ? 'bg-zinc-800 text-gray-400 hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed'
+                       : 'bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed'
               }`}
           >
             {d.label}
