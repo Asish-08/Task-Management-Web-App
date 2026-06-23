@@ -154,7 +154,7 @@ Two GitHub Actions workflows in `.github/workflows/`:
 
 | Workflow              | Trigger                               | Does                                                |
 | --------------------- | ------------------------------------- | --------------------------------------------------- |
-| `backend-deploy.yml`  | `backend/**` or `infra/template.yaml` | Runs tests → SAM deploy                             |
+| `backend-deploy.yml`  | `backend/**` or `infra/**`            | Runs tests → SAM deploy                             |
 | `frontend-deploy.yml` | `frontend/**`                         | Builds → S3 sync (two-step cache) → CF invalidation |
 
 ### Required GitHub repository secrets
@@ -200,3 +200,7 @@ env:
 **S3_BUCKET_NAME is the bare bucket name** — The workflow constructs `s3://${{ secrets.S3_BUCKET_NAME }}`. If the secret value includes `s3://`, the result is `s3://s3://...` and the sync fails. Value must be `taskpulse-frontend-678412441430` with no prefix.
 
 **Do not add a catch-all workflow with no `paths:` filter** — A workflow that fires on every push to `main` with no path filter will race any path-filtered workflow that covers the same stack. Two concurrent SAM deploys to the same CloudFormation stack causes "Stack is in UPDATE_IN_PROGRESS" failures. Always use path filters and keep one workflow per concern.
+
+**`confirm_changeset = false` in `infra/samconfig.toml` is intentional** — SAM's `confirm_changeset = true` causes it to print the changeset and wait for `y/N` input. In CI there is no TTY, so SAM gets no input and aborts with exit code 1. The setting is `false` to match the `--no-confirm-changeset` flag already in the workflow. Do not change it back to `true`.
+
+**Re-running a failed GitHub Actions job uses the workflow from the original triggering commit** — clicking "Re-run failed jobs" replays the workflow YAML that was in place when the job first ran, not the current HEAD. If you fix a workflow file in a commit that doesn't match any path filter (e.g. only `.github/workflows/` changed), the fix will never be exercised by a re-run. To pick up a workflow fix, push a new commit that touches a path covered by the filter (`backend/**` or `infra/**`).

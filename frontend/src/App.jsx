@@ -67,6 +67,12 @@ export default function App() {
           running={pomodoro.running}
           onToggle={pomodoro.toggle}
           onReset={pomodoro.reset}
+          durations={pomodoro.durations}
+          selectedDuration={pomodoro.selectedDuration}
+          onSelectDuration={pomodoro.selectDuration}
+          onBreak={pomodoro.startBreak}
+          isBreak={pomodoro.isBreak}
+          onSetCustomTime={pomodoro.setCustomTime}
         />
       </div>
 
