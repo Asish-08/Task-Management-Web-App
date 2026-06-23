@@ -6,6 +6,10 @@ class TaskCreate(BaseModel):
     title: str
 
 
+class TaskUpdate(BaseModel):
+    title: str
+
+
 class TaskOut(BaseModel):
     id: int
     title: str

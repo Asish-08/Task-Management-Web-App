@@ -7,6 +7,7 @@ const api = axios.create({
 
 export const fetchActiveTasks    = () => api.get('/tasks')
 export const createTask          = (title) => api.post('/tasks', { title })
+export const updateTask          = (id, title) => api.patch(`/tasks/${id}`, { title })
 export const completeTask        = (id) => api.patch(`/tasks/${id}/complete`)
 export const fetchCompletedTasks = () => api.get('/tasks/completed')
 export const fetchHeatmap        = () => api.get('/heatmap')

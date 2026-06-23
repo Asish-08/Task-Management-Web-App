@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { fetchActiveTasks, createTask, completeTask, fetchCompletedTasks } from '../api/client'
+import { fetchActiveTasks, createTask, completeTask, updateTask, fetchCompletedTasks } from '../api/client'
 
 export function useTasks() {
   const [active, setActive] = useState([])
@@ -30,5 +30,10 @@ export function useTasks() {
     setCompleted(prev => [data, ...prev])
   }
 
-  return { active, completed, loading, addTask, markComplete }
+  const editTask = async (id, title) => {
+    const { data } = await updateTask(id, title)
+    setActive(prev => prev.map(t => t.id === id ? data : t))
+  }
+
+  return { active, completed, loading, addTask, markComplete, editTask }
 }

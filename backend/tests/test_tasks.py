@@ -56,3 +56,21 @@ def test_completed_tasks_not_in_active(client):
     client.patch(f"/tasks/{created['id']}/complete")
     active = client.get("/tasks").json()
     assert all(t["id"] != created["id"] for t in active)
+
+
+def test_update_task_title(client):
+    created = client.post("/tasks", json={"title": "Old title"}).json()
+    res = client.patch(f"/tasks/{created['id']}", json={"title": "New title"})
+    assert res.status_code == 200
+    assert res.json()["title"] == "New title"
+
+
+def test_update_task_empty_title(client):
+    created = client.post("/tasks", json={"title": "Something"}).json()
+    res = client.patch(f"/tasks/{created['id']}", json={"title": "   "})
+    assert res.status_code == 422
+
+
+def test_update_task_not_found(client):
+    res = client.patch("/tasks/99999", json={"title": "Ghost"})
+    assert res.status_code == 404

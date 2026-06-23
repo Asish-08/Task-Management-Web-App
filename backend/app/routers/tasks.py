@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Task
-from app.schemas import TaskCreate, TaskOut
+from app.schemas import TaskCreate, TaskUpdate, TaskOut
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -28,6 +28,20 @@ def get_active_tasks(db: Session = Depends(get_db)):
         .order_by(Task.created_at.desc())
         .all()
     )
+
+
+@router.patch("/{task_id}", response_model=TaskOut)
+def update_task(task_id: int, payload: TaskUpdate, db: Session = Depends(get_db)):
+    task = db.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    title = payload.title.strip()
+    if not title:
+        raise HTTPException(status_code=422, detail="Title cannot be empty")
+    task.title = title
+    db.commit()
+    db.refresh(task)
+    return task
 
 
 @router.patch("/{task_id}/complete", response_model=TaskOut)

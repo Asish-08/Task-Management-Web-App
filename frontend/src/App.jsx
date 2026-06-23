@@ -14,7 +14,7 @@ function localDateStr(date) {
 }
 
 export default function App() {
-  const { active, completed, addTask, markComplete } = useTasks()
+  const { active, completed, addTask, markComplete, editTask } = useTasks()
   const { data: heatmap, incrementToday } = useHeatmap()
   const quote    = useQuote()
   const pomodoro = usePomodoro()
@@ -55,6 +55,7 @@ export default function App() {
             tasks={active}
             onAdd={addTask}
             onComplete={handleComplete}
+            onEdit={editTask}
           />
         </div>
 
