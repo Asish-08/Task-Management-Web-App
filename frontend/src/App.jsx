@@ -47,7 +47,7 @@ export default function App() {
   const pomodoro = usePomodoro()
 
   // Which day's tasks to show — defaults to today, updated on block click
-  const [selectedDate, setSelectedDate] = useState(() => localDateStr(new Date()))
+  const [selectedDate, setSelectedDate] = useState(null)
   const [dark, setDark] = useState(false)
 
   function handleDaySelect(date) {
@@ -63,7 +63,8 @@ export default function App() {
   const dailyCompleted = completed.filter(t => {
     if (!t.completed_at) return false
     const ts = t.completed_at.endsWith('Z') ? t.completed_at : t.completed_at + 'Z'
-    return localDateStr(new Date(ts)) === selectedDate
+    const filterDate = selectedDate || localDateStr(new Date())
+    return localDateStr(new Date(ts)) === filterDate
   })
 
   return (

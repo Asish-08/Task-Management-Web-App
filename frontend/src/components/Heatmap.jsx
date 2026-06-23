@@ -33,9 +33,7 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
 
   // Click: select this day; clicking selected day or today resets to today
   function handleCellClick(date) {
-    const todayStr = localDateStr(new Date())
-    const next = (selectedDate === date || date === todayStr) ? todayStr : date
-    onDaySelect(next)
+    onDaySelect(selectedDate === date ? null : date)
   }
 
   if (!data.length) {
@@ -92,6 +90,7 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
                   ? (e) => handleMouseEnter(day.date, day.count, e)
                   : undefined}
                 onMouseLeave={day.count >= 0 ? handleMouseLeave : undefined}
+                dark={dark}
               />
             ))}
           </div>
@@ -102,7 +101,7 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
       <div className="flex items-center gap-1.5 mt-3 text-gray-400" style={{ fontSize: '10px' }}>
         <span>Less</span>
         {[0, 1, 3, 6].map(v => (
-          <div key={v} className={`w-3 h-3 rounded-sm ${colorClass(v)}`} />
+          <div key={v} className={`w-3 h-3 rounded-sm ${v === 0 ? (dark ? 'bg-zinc-700' : 'bg-gray-200') : colorClass(v)}`} />
         ))}
         <span>More</span>
       </div>
