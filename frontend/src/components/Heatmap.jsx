@@ -33,7 +33,9 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
 
   // Click: select this day; clicking selected day or today resets to today
   function handleCellClick(date) {
-    onDaySelect(selectedDate === date ? null : date)
+    const todayStr = localDateStr(new Date())
+    const next = (selectedDate === date || date === todayStr) ? todayStr : date
+    onDaySelect(next)
   }
 
   if (!data.length) {

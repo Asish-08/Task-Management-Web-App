@@ -26,59 +26,104 @@ export function usePomodoro() {
   const [secondsLeft, setSecondsLeft] = useState(DURATIONS[0].seconds)
   const [running, setRunning] = useState(false)
   const [isBreak, setIsBreak] = useState(false)
+
   const intervalRef = useRef(null)
+  // Holds the absolute deadline while running; null when paused/stopped.
+  const endTimeRef = useRef(null)
+  // Mirrors secondsLeft state so effects can read the current value without stale closures.
+  const secondsLeftRef = useRef(DURATIONS[0].seconds)
+  secondsLeftRef.current = secondsLeft
   const selectedDurationRef = useRef(selectedDuration)
   selectedDurationRef.current = selectedDuration
-  const tick = useCallback(() => {
-    setSecondsLeft(prev => {
-      if (prev <= 1) {
-        clearInterval(intervalRef.current)
-        setRunning(false)
-        setIsBreak(false)
-        playAlarm()
-        return DURATIONS[selectedDurationRef.current].seconds
-      }
-      return prev - 1
-    })
+
+  const fireComplete = useCallback(() => {
+    clearInterval(intervalRef.current)
+    endTimeRef.current = null
+    setRunning(false)
+    setIsBreak(false)
+    playAlarm()
+    const reset = DURATIONS[selectedDurationRef.current].seconds
+    secondsLeftRef.current = reset
+    setSecondsLeft(reset)
   }, [])
+
+  // Recomputes remaining time from the wall-clock deadline rather than counting ticks.
+  const recompute = useCallback(() => {
+    if (!endTimeRef.current) return
+    const remaining = Math.max(0, Math.ceil((endTimeRef.current - Date.now()) / 1000))
+    secondsLeftRef.current = remaining
+    setSecondsLeft(remaining)
+    if (remaining === 0) fireComplete()
+  }, [fireComplete])
 
   useEffect(() => {
     if (running) {
-      intervalRef.current = setInterval(tick, 1000)
+      endTimeRef.current = Date.now() + secondsLeftRef.current * 1000
+      recompute()
+      intervalRef.current = setInterval(recompute, 250)
     } else {
       clearInterval(intervalRef.current)
+      // Freeze the displayed time to the wall-clock value at the moment of pause.
+      if (endTimeRef.current) {
+        const frozen = Math.max(0, Math.ceil((endTimeRef.current - Date.now()) / 1000))
+        secondsLeftRef.current = frozen
+        setSecondsLeft(frozen)
+        endTimeRef.current = null
+      }
     }
     return () => clearInterval(intervalRef.current)
-  }, [running, tick])
+  }, [running, recompute])
+
+  // Snap to correct time immediately when the tab becomes visible again.
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.visibilityState === 'visible') recompute()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [recompute])
 
   const selectDuration = useCallback((index) => {
     clearInterval(intervalRef.current)
+    endTimeRef.current = null
     setRunning(false)
     setIsBreak(false)
     setSelectedDuration(index)
-    setSecondsLeft(DURATIONS[index].seconds)
+    const s = DURATIONS[index].seconds
+    secondsLeftRef.current = s
+    setSecondsLeft(s)
   }, [])
 
   const startBreak = useCallback(() => {
     clearInterval(intervalRef.current)
+    endTimeRef.current = null
+    const s = BREAK_SECONDS
+    secondsLeftRef.current = s
+    setSecondsLeft(s)
     setIsBreak(true)
-    setSecondsLeft(BREAK_SECONDS)
     setRunning(true)
   }, [])
 
   const toggle = () => setRunning(r => !r)
 
   const reset = () => {
+    clearInterval(intervalRef.current)
+    endTimeRef.current = null
     setRunning(false)
     setIsBreak(false)
-    setSecondsLeft(DURATIONS[selectedDurationRef.current].seconds)
+    const s = DURATIONS[selectedDurationRef.current].seconds
+    secondsLeftRef.current = s
+    setSecondsLeft(s)
   }
 
   const setCustomTime = useCallback((h, m, s) => {
     clearInterval(intervalRef.current)
+    endTimeRef.current = null
     setRunning(false)
     setIsBreak(false)
-    setSecondsLeft(Math.max(1, h * 3600 + m * 60 + s))
+    const total = Math.max(1, h * 3600 + m * 60 + s)
+    secondsLeftRef.current = total
+    setSecondsLeft(total)
   }, [])
 
   return {
