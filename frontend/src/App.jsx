@@ -29,6 +29,7 @@ function MoonIcon() {
 import { useTasks }    from './hooks/useTasks'
 import { useHeatmap }  from './hooks/useHeatmap'
 import { useQuote }    from './hooks/useQuote'
+import { useStartup }  from './hooks/useStartup'
 import { usePomodoro } from './hooks/usePomodoro'
 import { TaskList }    from './components/TaskList'
 import { QuotePanel }  from './components/QuotePanel'
@@ -41,9 +42,10 @@ function localDateStr(date) {
 }
 
 export default function App() {
-  const { active, completed, addTask, markComplete, editTask } = useTasks()
-  const { data: heatmap, incrementToday } = useHeatmap()
-  const quote    = useQuote()
+  const startup  = useStartup()
+  const { active, completed, addTask, markComplete, editTask } = useTasks(startup)
+  const { data: heatmap, incrementToday } = useHeatmap(startup?.heatmap_timestamps)
+  const quote    = useQuote(startup?.quote)
   const pomodoro = usePomodoro()
 
   // Which day's tasks to show — defaults to today, updated on block click

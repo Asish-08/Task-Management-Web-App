@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { fetchQuote } from '../api/client'
 
-export function useQuote() {
+export function useQuote(seedQuote) {
   const [quote, setQuote] = useState(null)
 
   useEffect(() => {
-    fetchQuote().then(r => setQuote(r.data)).catch(() => {})
-  }, [])
+    if (!seedQuote) return
+    setQuote(seedQuote)
+  }, [seedQuote])
 
   return quote
 }
