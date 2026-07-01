@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from app.config import settings
-from app.routers import tasks, heatmap, quotes
+from app.routers import tasks, heatmap, quotes, startup
 
 app = FastAPI(title="TaskPulse API", version="1.0.0")
 
@@ -17,6 +17,7 @@ app.add_middleware(
 app.include_router(tasks.router)
 app.include_router(heatmap.router)
 app.include_router(quotes.router)
+app.include_router(startup.router)
 
 
 @app.get("/health")
