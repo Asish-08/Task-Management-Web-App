@@ -17,13 +17,9 @@ function buildHeatmapGrid(timestamps) {
   const today = new Date()
   const todayNorm = new Date(today.getFullYear(), today.getMonth(), today.getDate())
 
-  const rangeStart = new Date(today.getFullYear(), today.getMonth(), 1)
+  const rangeStart = new Date(today.getFullYear(), 0, 1)
 
-  const rangeEnd = new Date(
-    rangeStart.getFullYear(),
-    rangeStart.getMonth(),
-    rangeStart.getDate() + 363,
-  )
+  const rangeEnd = new Date(rangeStart.getFullYear(), 11, 31)
 
   const daysBack = (rangeStart.getDay() + 6) % 7
   const gridStart = new Date(
