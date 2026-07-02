@@ -61,7 +61,7 @@ function TaskItem({ task, onComplete, onEdit, dark }) {
 
 export function TaskList({ tasks, onAdd, onComplete, onEdit, dark }) {
   return (
-    <div className={`flex flex-col h-full rounded-xl p-4 gap-3 overflow-hidden ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+    <div className={`flex flex-col h-full rounded-xl p-4 gap-3 overflow-hidden ${dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'}`}>
       <h2 className={`font-semibold text-base flex-shrink-0 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Active Tasks</h2>
       <div className="flex-shrink-0">
         <TaskInput onAdd={onAdd} dark={dark} />

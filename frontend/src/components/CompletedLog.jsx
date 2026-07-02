@@ -17,7 +17,7 @@ export function CompletedLog({ tasks, selectedDate, dark }) {
   const label   = isToday ? 'Today' : formatShortDate(effectiveDate)
 
   return (
-    <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+    <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'}`}>
       <h2 className={`font-semibold text-base mb-3 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>
         {label} — Completed
         {tasks.length > 0 && (

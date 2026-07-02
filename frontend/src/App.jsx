@@ -78,7 +78,7 @@ export default function App() {
   })
 
   return (
-    <div className={`min-h-screen ${dark ? 'bg-black' : 'bg-slate-100'} text-gray-900 p-4 md:p-6 flex flex-col gap-4`}>
+    <div className={`min-h-screen ${dark ? 'bg-black' : 'bg-[#F3F2EF]'} text-gray-900 p-4 md:p-6 flex flex-col gap-4`}>
 
       {/* Header */}
       <div className={`flex items-center justify-between pb-2 border-b ${dark ? 'border-zinc-800' : 'border-gray-200'}`}>

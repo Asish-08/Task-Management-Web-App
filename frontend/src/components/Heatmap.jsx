@@ -40,7 +40,7 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
 
   if (!data.length) {
     return (
-      <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+      <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'}`}>
         <h2 className={`font-semibold text-base mb-3 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Activity</h2>
         <div className="h-20 flex items-center justify-center text-gray-400 text-sm">
           Loading activity...
@@ -64,7 +64,7 @@ export function Heatmap({ data, selectedDate, onDaySelect, dark }) {
   })
 
   return (
-    <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+    <div className={`rounded-xl p-4 ${dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'}`}>
       <h2 className={`font-semibold text-base mb-3 ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Activity</h2>
 
       {/* Month labels */}

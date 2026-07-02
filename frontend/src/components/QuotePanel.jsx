@@ -1,5 +1,5 @@
 export function QuotePanel({ quote, dark }) {
-  const card = dark ? 'bg-zinc-900' : 'bg-white'
+  const card = dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'
   const skeleton = dark ? 'bg-zinc-700' : 'bg-gray-200'
 
   if (!quote) {

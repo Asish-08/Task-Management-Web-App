@@ -24,6 +24,5 @@ dist-ssr
 *.sw?
 
 
-#ignore claude.md
-claude.md
+
 

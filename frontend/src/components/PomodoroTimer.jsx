@@ -123,7 +123,7 @@ export function PomodoroTimer({
   }
 
   return (
-    <div ref={timerRef} className={`rounded-xl p-4 h-full flex ${dark ? 'bg-zinc-900' : 'bg-white'}`}>
+    <div ref={timerRef} className={`rounded-xl p-4 h-full flex ${dark ? 'bg-zinc-900' : 'bg-[#FFFFFF]'}`}>
       {/* Left: label + display + controls */}
       <div className="flex flex-col items-center justify-center gap-3 flex-1">
         <p className="text-indigo-600 text-xs font-semibold uppercase tracking-wider">
