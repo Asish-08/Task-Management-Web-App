@@ -27,7 +27,7 @@ export function useTasks(seed) {
   const addTask = async (title) => {
     const tempId = 'temp-' + Date.now()
     const optimistic = { id: tempId, title, status: 'active', created_at: new Date().toISOString() }
-    setActive(prev => [optimistic, ...prev])
+    setActive(prev => [...prev, optimistic])
     try {
       const { data } = await createTask(title)
       setActive(prev => prev.map(t => t.id === tempId ? data : t))
@@ -46,7 +46,7 @@ export function useTasks(seed) {
       const { data } = await completeTask(id)
       setCompleted(prev => prev.map(t => t.id === id ? data : t))
     } catch {
-      setActive(prev => [task, ...prev])
+      setActive(prev => [...prev, task].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)))
       setCompleted(prev => prev.filter(t => t.id !== id))
     }
   }

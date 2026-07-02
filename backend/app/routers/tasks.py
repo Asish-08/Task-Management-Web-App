@@ -25,7 +25,7 @@ def get_active_tasks(db: Session = Depends(get_db)):
     return (
         db.query(Task)
         .filter(Task.status == "active")
-        .order_by(Task.created_at.desc())
+        .order_by(Task.created_at.asc(), Task.id.asc())
         .all()
     )
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function SunIcon() {
   return (
@@ -41,6 +41,30 @@ function localDateStr(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`
 }
 
+const ADD_MESSAGES = [
+  "Task added! Time to get to work 💼",
+  "New mission unlocked! 🎯",
+  "Added to the list, now let's crush it 🔥",
+  "One more thing standing between you and done 📝",
+  "Challenge accepted! 🚀",
+  "On the board! Let's go 🌟",
+  "Task locked in ⚡",
+]
+
+const COMPLETE_MESSAGES = [
+  "Hooray, you completed another one! 🎉",
+  "You go champ! 💪",
+  "Crushing it, one task at a time! 🔥",
+  "That's what we call progress! ⚡",
+  "Look at you getting things done! 🌟",
+  "Another one bites the dust! 🎯",
+  "Keep that momentum going! 🚀",
+]
+
+function randomMessage(list) {
+  return list[Math.floor(Math.random() * list.length)]
+}
+
 export default function App() {
   const startup  = useStartup()
   const { active, completed, addTask, markComplete, editTask } = useTasks(startup)
@@ -51,6 +75,13 @@ export default function App() {
   // Which day's tasks to show — defaults to today, updated on block click
   const [selectedDate, setSelectedDate] = useState(null)
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
+  const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 2500)
+    return () => clearTimeout(timer)
+  }, [toast])
 
   function toggleDark() {
     setDark(d => {
@@ -64,7 +95,13 @@ export default function App() {
     setSelectedDate(date)
   }
 
+  function handleAddTask(title) {
+    setToast({ message: randomMessage(ADD_MESSAGES), color: 'rgb(0, 76, 252)' })
+    addTask(title)
+  }
+
   async function handleComplete(id) {
+    setToast({ message: randomMessage(COMPLETE_MESSAGES), color: '' })
     await markComplete(id)
     incrementToday()
   }
@@ -81,8 +118,16 @@ export default function App() {
     <div className={`min-h-screen ${dark ? 'bg-black' : 'bg-[#F3F2EF]'} text-gray-900 p-4 md:p-6 flex flex-col gap-4`}>
 
       {/* Header */}
-      <div className={`flex items-center justify-between pb-2 border-b ${dark ? 'border-zinc-800' : 'border-gray-200'}`}>
+      <div className={`relative flex items-center justify-between pb-2 border-b ${dark ? 'border-zinc-800' : 'border-gray-200'}`}>
         <h1 className={`text-lg font-bold tracking-tight ${dark ? 'text-gray-100' : 'text-gray-900'}`}>Tasks Tracker</h1>
+        {toast && (
+          <div
+            style={toast.color ? { backgroundColor: toast.color } : undefined}
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-md whitespace-nowrap ${toast.color ? '' : 'bg-green-600'}`}
+          >
+            {toast.message}
+          </div>
+        )}
         <button
           onClick={toggleDark}
           aria-label="Toggle dark mode"
@@ -103,7 +148,7 @@ export default function App() {
         <div className="md:row-span-2 h-full">
           <TaskList
             tasks={active}
-            onAdd={addTask}
+            onAdd={handleAddTask}
             onComplete={handleComplete}
             onEdit={editTask}
             dark={dark}
