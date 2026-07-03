@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { fetchActiveTasks, createTask, completeTask, updateTask, fetchCompletedTasks } from '../api/client'
+import { fetchActiveTasks, createTask, completeTask, updateTask, fetchCompletedTasks, moveTaskToFolder as moveTaskToFolderApi } from '../api/client'
 
 export function useTasks(seed) {
   const [active, setActive] = useState([])
@@ -38,16 +38,18 @@ export function useTasks(seed) {
 
   const markComplete = async (id) => {
     const task = active.find(t => t.id === id)
-    if (!task) return
+    if (!task) return null
     const optimistic = { ...task, status: 'completed', completed_at: new Date().toISOString() }
     setActive(prev => prev.filter(t => t.id !== id))
     setCompleted(prev => [optimistic, ...prev])
     try {
       const { data } = await completeTask(id)
-      setCompleted(prev => prev.map(t => t.id === id ? data : t))
+      setCompleted(prev => prev.map(t => t.id === id ? data.task : t))
+      return data.deleted_folder_id ?? null
     } catch {
       setActive(prev => [...prev, task].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)))
       setCompleted(prev => prev.filter(t => t.id !== id))
+      return null
     }
   }
 
@@ -56,5 +58,18 @@ export function useTasks(seed) {
     setActive(prev => prev.map(t => t.id === id ? data : t))
   }
 
-  return { active, completed, loading, addTask, markComplete, editTask, loadAll }
+  const moveTaskToFolder = async (taskId, folderId) => {
+    const task = active.find(t => t.id === taskId)
+    if (!task || typeof task.id === 'string') return
+    const prevFolderId = task.folder_id ?? null
+    setActive(prev => prev.map(t => t.id === taskId ? { ...t, folder_id: folderId } : t))
+    try {
+      const { data } = await moveTaskToFolderApi(taskId, folderId)
+      setActive(prev => prev.map(t => t.id === taskId ? data : t))
+    } catch {
+      setActive(prev => prev.map(t => t.id === taskId ? { ...t, folder_id: prevFolderId } : t))
+    }
+  }
+
+  return { active, completed, loading, addTask, markComplete, editTask, moveTaskToFolder, loadAll }
 }

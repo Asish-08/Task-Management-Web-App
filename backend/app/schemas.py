@@ -16,6 +16,33 @@ class TaskOut(BaseModel):
     status: str
     created_at: datetime
     completed_at: datetime | None = None
+    folder_id: int | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class TaskFolderUpdate(BaseModel):
+    folder_id: int | None
+
+
+class CompleteTaskOut(BaseModel):
+    task: TaskOut
+    deleted_folder_id: int | None = None
+
+
+class FolderCreate(BaseModel):
+    name: str = "Untitled Folder"
+
+
+class FolderRename(BaseModel):
+    name: str
+
+
+class FolderOut(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+    emptied_at: datetime
 
     model_config = {"from_attributes": True}
 

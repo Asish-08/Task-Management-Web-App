@@ -13,3 +13,8 @@ export const completeTask        = (id) => api.patch(`/tasks/${id}/complete`)
 export const fetchCompletedTasks = () => api.get('/tasks/completed')
 export const fetchHeatmap        = () => api.get('/heatmap')
 export const fetchQuote          = () => api.get('/quotes')
+
+export const createFolder        = () => api.post('/folders', {})
+export const renameFolder        = (id, name) => api.patch(`/folders/${id}`, { name })
+export const deleteFolder        = (id) => api.delete(`/folders/${id}`)
+export const moveTaskToFolder    = (taskId, folderId) => api.patch(`/tasks/${taskId}/folder`, { folder_id: folderId })

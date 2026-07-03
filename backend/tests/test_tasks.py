@@ -5,6 +5,7 @@ def test_create_task(client):
     assert data["title"] == "Write tests"
     assert data["status"] == "active"
     assert data["completed_at"] is None
+    assert data["folder_id"] is None
 
 
 def test_create_task_empty_title(client):
@@ -25,8 +26,9 @@ def test_complete_task(client):
     r = client.patch(f"/tasks/{created['id']}/complete")
     assert r.status_code == 200
     data = r.json()
-    assert data["status"] == "completed"
-    assert data["completed_at"] is not None
+    assert data["task"]["status"] == "completed"
+    assert data["task"]["completed_at"] is not None
+    assert data["deleted_folder_id"] is None
 
 
 def test_complete_task_not_found(client):

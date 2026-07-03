@@ -31,6 +31,7 @@ import { useHeatmap }  from './hooks/useHeatmap'
 import { useQuote }    from './hooks/useQuote'
 import { useStartup }  from './hooks/useStartup'
 import { usePomodoro } from './hooks/usePomodoro'
+import { useFolders }  from './hooks/useFolders'
 import { TaskList }    from './components/TaskList'
 import { QuotePanel }  from './components/QuotePanel'
 import { PomodoroTimer } from './components/PomodoroTimer'
@@ -67,7 +68,7 @@ function randomMessage(list) {
 
 export default function App() {
   const startup  = useStartup()
-  const { active, completed, addTask, markComplete, editTask } = useTasks(startup)
+  const { active, completed, addTask, markComplete, editTask, moveTaskToFolder } = useTasks(startup)
   const { data: heatmap, incrementToday } = useHeatmap(startup?.heatmap_timestamps)
   const quote    = useQuote(startup?.quote)
   const pomodoro = usePomodoro()
@@ -77,8 +78,19 @@ export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark')
   const [toast, setToast] = useState(null)
 
+  const { folders, createFolder, renameFolder, removeFolderLocally } = useFolders(
+    startup?.folders,
+    active,
+    () => setToast({ message: 'Recently created folder is deleted', color: '', sticky: true })
+  )
+
   useEffect(() => {
     if (!toast) return
+    if (toast.sticky) {
+      const dismiss = () => setToast(null)
+      window.addEventListener('click', dismiss, { once: true })
+      return () => window.removeEventListener('click', dismiss)
+    }
     const timer = setTimeout(() => setToast(null), 2500)
     return () => clearTimeout(timer)
   }, [toast])
@@ -102,8 +114,9 @@ export default function App() {
 
   async function handleComplete(id) {
     setToast({ message: randomMessage(COMPLETE_MESSAGES), color: '' })
-    await markComplete(id)
+    const deletedFolderId = await markComplete(id)
     incrementToday()
+    if (deletedFolderId) removeFolderLocally(deletedFolderId)
   }
 
   // Filter completed tasks to the selected date (treat API timestamps as UTC)
@@ -148,9 +161,13 @@ export default function App() {
         <div className="md:row-span-2 h-full">
           <TaskList
             tasks={active}
+            folders={folders}
             onAdd={handleAddTask}
             onComplete={handleComplete}
             onEdit={editTask}
+            onCreateFolder={createFolder}
+            onRenameFolder={renameFolder}
+            onMoveTask={moveTaskToFolder}
             dark={dark}
           />
         </div>
