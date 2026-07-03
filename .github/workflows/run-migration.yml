@@ -1,0 +1,20 @@
+name: Run DB Migration (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      migration_file:
+        description: "Path to the migration file to run"
+        required: true
+        default: "infra/migrations/004_create_folders.sql"
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Run migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: psql "$DATABASE_URL" -f "${{ github.event.inputs.migration_file }}"
