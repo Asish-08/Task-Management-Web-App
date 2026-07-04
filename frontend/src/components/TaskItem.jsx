@@ -37,12 +37,12 @@ export function TaskItem({ task, onComplete, onEdit, dark }) {
     <li
       draggable={isPersisted}
       onDragStart={isPersisted ? handleDragStart : undefined}
-      className={`flex items-center gap-3 rounded-lg px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-gray-100'}
+      className={`flex items-start gap-3 rounded-lg px-3 py-2 ${dark ? 'bg-zinc-800' : 'bg-gray-100'}
         ${isPersisted ? 'cursor-grab active:cursor-grabbing' : ''}`}
     >
       <button
         onClick={() => onComplete(task.id)}
-        className="w-5 h-5 rounded border border-gray-300 hover:border-indigo-500
+        className="w-5 h-5 mt-0.5 rounded border border-gray-300 hover:border-indigo-500
                    hover:bg-indigo-50 transition-colors flex-shrink-0"
         aria-label="Mark complete"
       />
@@ -58,7 +58,7 @@ export function TaskItem({ task, onComplete, onEdit, dark }) {
         />
       ) : (
         <span
-          className={`text-sm truncate flex-1 cursor-text ${dark ? 'text-gray-100' : 'text-gray-800'}`}
+          className={`text-sm flex-1 min-w-0 cursor-text break-words whitespace-pre-wrap ${dark ? 'text-gray-100' : 'text-gray-800'}`}
           onDoubleClick={startEdit}
           title="Double-click to edit"
         >
