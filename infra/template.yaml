@@ -12,6 +12,9 @@ Parameters:
   CorsOrigins:
     Type: String
     Default: "*"
+  JwtSecretKey:
+    Type: String
+    NoEcho: true
 
 Globals:
   Function:
@@ -23,6 +26,7 @@ Globals:
         DATABASE_URL: !Ref DatabaseUrl
         CORS_ORIGINS: !Ref CorsOrigins
         ENVIRONMENT: !Ref Environment
+        JWT_SECRET_KEY: !Ref JwtSecretKey
 
 Resources:
 

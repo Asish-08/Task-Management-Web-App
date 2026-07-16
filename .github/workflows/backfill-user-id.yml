@@ -1,0 +1,50 @@
+name: ONE-TIME - Backfill legacy task/folder ownership
+
+# Delete this file after running it once. It exists only to assign the
+# pre-auth tasks/folders (user_id IS NULL) to the first real production
+# account, without ever needing to paste the production DATABASE_URL
+# anywhere outside of GitHub's own secret store.
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_id:
+        description: "users.id to assign ownerless tasks/folders to (check via the temporary SELECT run first if unsure)"
+        required: true
+        type: string
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install psycopg2
+        run: pip install psycopg2-binary
+
+      - name: Backfill ownerless tasks and folders
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          USER_ID: ${{ inputs.user_id }}
+        run: |
+          python3 - <<'EOF'
+          import os
+          import psycopg2
+
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          conn.autocommit = True
+          cur = conn.cursor()
+          uid = int(os.environ["USER_ID"])
+
+          cur.execute("SELECT id, username, email FROM users WHERE id = %s", (uid,))
+          row = cur.fetchone()
+          if row is None:
+              raise SystemExit(f"No user with id={uid} exists — aborting, nothing was changed.")
+          print(f"Backfilling onto user {row}")
+
+          cur.execute("UPDATE tasks SET user_id = %s WHERE user_id IS NULL", (uid,))
+          print(f"tasks updated: {cur.rowcount}")
+          cur.execute("UPDATE folders SET user_id = %s WHERE user_id IS NULL", (uid,))
+          print(f"folders updated: {cur.rowcount}")
+
+          cur.close()
+          conn.close()
+          EOF

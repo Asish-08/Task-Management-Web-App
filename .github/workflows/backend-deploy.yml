@@ -28,6 +28,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: "sqlite:///:memory:"
+          JWT_SECRET_KEY: "test-secret-key"
         run: python -m pytest tests/ -v --tb=short
 
   deploy:
@@ -40,6 +41,28 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Install migration runner dependencies
+        run: pip install psycopg2-binary
+
+      - name: Apply database migrations
+        working-directory: infra/migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python3 - <<'EOF'
+          import glob, os, psycopg2
+
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          conn.autocommit = True
+          cur = conn.cursor()
+          for path in sorted(glob.glob("*.sql")):
+              print(f"Applying {path}")
+              with open(path) as f:
+                  cur.execute(f.read())
+          cur.close()
+          conn.close()
+          EOF
 
       - uses: aws-actions/setup-sam@v2
         with:
@@ -63,4 +86,5 @@ jobs:
             --no-confirm-changeset \
             --parameter-overrides \
               "DatabaseUrl=${{ secrets.DATABASE_URL }}" \
-              "CorsOrigins=${{ secrets.CORS_ORIGINS }}"
+              "CorsOrigins=${{ secrets.CORS_ORIGINS }}" \
+              "JwtSecretKey=${{ secrets.JWT_SECRET_KEY }}"

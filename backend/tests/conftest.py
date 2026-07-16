@@ -39,3 +39,18 @@ def client():
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+def signup_and_get_token(client, username="testuser", password="Str0ng!Pass"):
+    r = client.post("/auth/signup", json={"username": username, "password": password})
+    return r.json()
+
+
+@pytest.fixture
+def signup_user(client):
+    return signup_and_get_token(client)
+
+
+@pytest.fixture
+def auth_headers(signup_user):
+    return {"Authorization": f"Bearer {signup_user['access_token']}"}

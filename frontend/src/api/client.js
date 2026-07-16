@@ -5,6 +5,17 @@ const api = axios.create({
   timeout: 10000,
 })
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+export const signup              = (username, password) => api.post('/auth/signup', { username, password })
+export const login                = (username, password) => api.post('/auth/login', { username, password })
+export const fetchMe              = () => api.get('/auth/me')
+export const updateProfile        = (name, email, bio) => api.patch('/auth/me', { name, email, bio })
+
 export const fetchStartup        = () => api.get('/startup')
 export const fetchActiveTasks    = () => api.get('/tasks')
 export const createTask          = (title) => api.post('/tasks', { title })

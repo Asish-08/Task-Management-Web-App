@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from app.config import settings
-from app.routers import tasks, heatmap, quotes, startup, folders
+from app.routers import tasks, heatmap, quotes, startup, folders, auth
 
 app = FastAPI(title="TaskPulse API", version="1.0.0")
 
@@ -14,6 +14,7 @@ app.add_middleware(
     allow_credentials=False,
 )
 
+app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(folders.router)
 app.include_router(heatmap.router)
