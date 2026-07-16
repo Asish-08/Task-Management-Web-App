@@ -87,6 +87,10 @@ export function ProfileSetupPage({ user, mode, onSubmit, onCancel, dark }) {
 
         {error && <p className="text-red-500 text-xs">{error}</p>}
 
+        <p className={`text-xs ${dark ? 'text-gray-500' : 'text-gray-400'}`}>
+          Tip: enable notifications for Chrome to get notified when your Pomodoro timer ends, even in another tab.
+        </p>
+
         <div className="flex gap-2 justify-end">
           {onCancel && (
             <button
